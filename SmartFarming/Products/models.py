@@ -1,29 +1,56 @@
+"""
+Storefront SKUs + optional gallery rows (``ProductImage``) for detail-page carousels.
+"""
+
 from django.db import models
 
 
-#product model to display the product available
 class Product(models.Model):
-    CATEGORY_CHOICES = [
-        ('Eggs', 'Eggs'),
-        ('Chicks', 'Chicks'),
-        ('Chicken', 'Chicken'),
-    ]
+    """Poultry catalog aligned with TechNest Africa product categories."""
 
-    SUBCATEGORY_CHOICES = [
-        ('Broilers', 'Broilers'),
-        ('Layers', 'Layers'),
-    ]
+    class ProductType(models.TextChoices):
+        EGGS_TRAY = "eggs_tray", "Eggs (tray)"
+        EGGS_HALF_TRAY = "eggs_half_tray", "Eggs (half tray)"
+        BROILER_CHICKEN = "broiler_chicken", "Broiler chicken"
+        LAYER_CHICKEN = "layer_chicken", "Layer chicken"
+        MANURE_BAGS = "manure_bags", "Manure (bags)"
+        MANURE_BULK = "manure_bulk", "Manure (bulk)"
+        FEED_STARTER = "feed_starter", "Feed (starter)"
+        FEED_GROWER = "feed_grower", "Feed (grower)"
+        FEED_FINISHER = "feed_finisher", "Feed (finisher)"
 
-    name = models.CharField(max_length=100)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
-    subcategory = models.CharField(max_length=50, choices=SUBCATEGORY_CHOICES, blank=True, null=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    name = models.CharField(max_length=120)
+    product_type = models.CharField(max_length=32, choices=ProductType.choices)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='product_images/', blank=True)
+    image = models.ImageField(upload_to="product_images/", blank=True)
     description = models.TextField(blank=True)
     available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["product_type", "name"]
+
     def __str__(self):
         return self.name
 
+
+class ProductImage(models.Model):
+    """
+    Extra photos beyond ``Product.image`` (hero/main shot).
+
+    Ordered by ``sort_order`` then PK — tweak via admin inlines when merchandising.
+    """
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="extra_images"
+    )
+    image = models.ImageField(upload_to="product_images/gallery/")
+    caption = models.CharField(max_length=200, blank=True)
+    sort_order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "pk"]
+
+    def __str__(self):
+        return f"{self.product.name} — image {self.pk}"
