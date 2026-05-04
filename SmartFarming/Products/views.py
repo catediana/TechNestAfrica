@@ -3,7 +3,7 @@ from collections import OrderedDict
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
 
-from blog.models import Post
+#from blog.models import Post
 from Products.models import Product
 
 # Template section order for product_list grouping (see ``_product_row_group``).
@@ -31,7 +31,7 @@ def _product_row_group(product_type: str) -> str:
 
 def home(request):
     featured = Product.objects.filter(available=True, stock__gt=0)[:6]
-    recent_posts = Post.objects.filter(published=True)[:3]
+   # recent_posts = Post.objects.filter(published=True)[:3]
     return render(
         request,
         "products/home.html",
