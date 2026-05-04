@@ -1,7 +1,13 @@
+""""
+storefront routes at site root:'/ ,/products/,
+, /procucts/<pk>/ 
+"""
 from django.urls import path
 from.import views
 
 urlpatterns = [
 
-    path('',views.Home,name='Home'),
+   path("", views.home, name="home"),
+   path("products/", views.product_list, name="product_list"), 
+   path("products/<int:pk>/", views.product_detail, name="product_detail"),
 ]
